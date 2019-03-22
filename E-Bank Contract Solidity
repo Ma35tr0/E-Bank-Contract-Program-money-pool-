@@ -1,0 +1,92 @@
+//----------------------------------------------------------
+//----------------------------------------------------------
+//Name:E Bank Contract Program(money pool)
+//Team Members: Malachi Butterfield, Zorico Gilbert, Jahmori Richardson
+//Version: Solidity 0.5.1
+//Description: This program allows users to Store there name, and age.
+//Input and,Output Ether
+//Check Balance
+//----------------------------------------------------------
+//----------------------------------------------------------
+pragma solidity ^0.5.1;
+
+//----------------------------------------------------------
+//----------------------------------------------------------
+//Address of bank and use
+//Creating name string for user to input
+//----------------------------------------------------------
+//----------------------------------------------------------
+contract EBank{
+    address payable public bank;
+    address payable public user;
+    string public name; //name string of user
+    
+    event NewContribution(address _who, uint _amountOfEther, uint _timestamp);
+    
+    mapping(address => uint) Deposits;
+    address[] contributors;
+    
+    constructor(address payable _bank, address payable _user) public {
+        bank = _bank;
+        user = _user;
+}
+
+ 
+function setName(string memory _name) public {
+    name = _name;
+}
+ 
+ function getName() view public returns (string memory){
+     return name;
+    }
+    
+    
+//----------------------------------------------------------------
+//----------------------------------------------------------------
+//InputEther: Users can add ether to there Account
+//----------------------------------------------------------------
+//----------------------------------------------------------------
+
+
+    function contribute() public payable {
+       if(Deposits[msg.sender] == 0) contributors.push(msg.sender);
+       Deposits [msg.sender] += msg.value;
+       emit NewContribution(msg.sender, msg.value,now);
+    }
+         
+    
+
+//----------------------------------------------------------------
+//----------------------------------------------------------------
+//OutputEther: User can remove ether for there Account
+//----------------------------------------------------------------
+//----------------------------------------------------------------
+
+      function userRefund() public {
+       require( address(this).balance > 0);
+       uint amountToSend = Deposits[msg.sender];
+       Deposits[msg.sender] =0;
+       msg.sender.transfer(amountToSend);
+    }
+    
+
+
+    function CleanUp() public {
+        require(msg.sender == user);
+        selfdestruct(user);
+    }
+    
+    function() external {
+        revert();
+    }
+
+//----------------------------------------------------------------
+//----------------------------------------------------------------
+//CheckBalance: User can Check Balance of wallet
+//----------------------------------------------------------------
+//----------------------------------------------------------------
+    
+    function CheckAccontBalance() public view returns (uint) {
+        return address(this).balance;
+    }    
+}
